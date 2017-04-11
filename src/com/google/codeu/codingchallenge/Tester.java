@@ -35,4 +35,19 @@ final class Tester {
       }
     }
   }
+
+  public void parsingTests() {
+//    Asserts.isTrue(validKeyValue("\"name\":\"sam doe\""), "hi");
+//    Asserts.isTrue(!validKeyValue("name:\"sam doe\""), "hi");
+//    Asserts.isTrue(validObject("{\n" +
+//            "    \"first\":\"sam\",\n" +
+//            "    \"last\":\"doe\"\n" +
+//            "  }"), "hi");
+//    Asserts.isTrue(validObject("{ \"first\" : \"sam\", \"last\":\"doe\" }"), "hi");
+//    Asserts.isTrue(!validObject("{\n" +
+//            "    \"first\":\"sam\"\n" +
+//            "    \"last\":\"doe\"\n" +
+//            "  }"), "hi");
+//    Asserts.isTrue(validKeyValue("\"name\": { \"first\":\"sam\", \"last\":\"doe\" }"), "hi");
+  }
 }

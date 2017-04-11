@@ -15,40 +15,48 @@
 package com.google.codeu.codingchallenge;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 final class MyJSON implements JSON {
 
-  @Override
-  public JSON getObject(String name) {
-    // TODO: implement this
-    return null;
-  }
+    Map<String, JSON> objectMap;
+    Map<String, String> stringMap;
 
-  @Override
-  public JSON setObject(String name, JSON value) {
-    // TODO: implement this
-    return this;
-  }
+    MyJSON() {
+        objectMap = new HashMap<>();
+        stringMap = new HashMap<>();
+    }
 
-  @Override
-  public String getString(String name) {
-    // TODO: implement this
-    return null;
-  }
+    @Override
+    public JSON getObject(String name) {
+        return objectMap.containsKey(name) ? objectMap.get(name) : null;
+    }
 
-  @Override
-  public JSON setString(String name, String value) {
-    // TODO: implement this
-    return this;
-  }
+    @Override
+    public JSON setObject(String name, JSON value) {
+        objectMap.put(name, value);
+        return this;
+    }
 
-  @Override
-  public void getObjects(Collection<String> names) {
-    // TODO: implement this
-  }
+    @Override
+    public String getString(String name) {
+        return stringMap.containsKey(name) ? stringMap.get(name) : null;
+    }
 
-  @Override
-  public void getStrings(Collection<String> names) {
-    // TODO: implement this
-  }
+    @Override
+    public JSON setString(String name, String value) {
+        stringMap.put(name, value);
+        return this;
+    }
+
+    @Override
+    public void getObjects(Collection<String> names) {
+        names.addAll(objectMap.keySet());
+    }
+
+    @Override
+    public void getStrings(Collection<String> names) {
+        names.addAll(stringMap.keySet());
+    }
 }
