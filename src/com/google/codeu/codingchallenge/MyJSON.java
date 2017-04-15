@@ -30,7 +30,11 @@ final class MyJSON implements JSON {
 
     @Override
     public JSON getObject(String name) {
-        return objectMap.containsKey(name) ? objectMap.get(name) : null;
+        if (objectMap.keySet().contains(name)) {
+            return objectMap.get(name);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -41,7 +45,7 @@ final class MyJSON implements JSON {
 
     @Override
     public String getString(String name) {
-        return stringMap.containsKey(name) ? stringMap.get(name) : null;
+        return stringMap.keySet().contains(name) ? stringMap.get(name) : null;
     }
 
     @Override
