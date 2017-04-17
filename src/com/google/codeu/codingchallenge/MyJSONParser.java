@@ -28,21 +28,21 @@ final class MyJSONParser implements JSONParser {
 
         MyJSON obj = new MyJSON();
 
-        String bothTypes = "( *\".*?\" *):( *\\{\".*?\" *\\}| *\".*?\" *)";
-        Matcher both = Pattern.compile(bothTypes).matcher(object);
+        object = object.replaceAll("\\s+",  " ").trim();
+        String stringOrObjectValue = "( *\".*?\" *):( *\\{\".*?\" *\\}| *\".*?\" *)";
+        Matcher m = Pattern.compile(stringOrObjectValue).matcher(object);
 
-        while (both.find()) {
-            if (!validKeyValue(both.group())) {
+        while (m.find()) {
+            if (!validKeyValue(m.group())) {
                 throw new IOException("Invalid key-value pair");
             }
-            String key = both.group(1);
-            key = key.replaceAll("\\s+", " ").trim();
+            String key = m.group(1).trim();
             key = key.substring(1, key.length() - 1).trim();
-            String value = both.group(2).trim();
+            String value = m.group(2).trim();
             if (validString(value)) {
                 obj.setString(key, value.substring(1, value.length() - 1));
             } else {
-                value = value.replace("\\s+", " ").trim();
+                value = value.trim();
                 obj.setObject(key, parse(value));
             }
         }
@@ -61,7 +61,7 @@ final class MyJSONParser implements JSONParser {
     }
 
     private boolean validObject(String s) {
-        String valObj = "\\{(\\s| )*\\}|\\{((((\\s| )*\".*?\" *: *\".*?\",(\\s| )*)+((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)+)(\\s| )*}(\\s| )*|(((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)))*(\\s| )*}(\\s| )*";
+        String valObj = "\\{(\\s| )*\\}(\\s| )*|(\\s| )*\\{((((\\s| )*\".*?\" *: *\".*?\",(\\s| )*)+((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)+)(\\s| )*}(\\s| )*|(((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)))*(\\s| )*}";
         Pattern obj = Pattern.compile(valObj);
         Matcher m = obj.matcher(s);
         return m.matches();
