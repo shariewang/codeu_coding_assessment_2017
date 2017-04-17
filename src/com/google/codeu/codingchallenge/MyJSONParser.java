@@ -58,10 +58,40 @@ final class MyJSONParser implements JSONParser {
     }
 
     private boolean validObject(String s) {
-        String valObj = "\\{(\\s|\\n)*}|\\{((((\\s|.)*\".*?\" *: *\".*?\",(\\s)*)+((\\s|.)*\".*?\" *: *\".*?\"(\\s)*)+)\\}|(((\\s|.)*\".*?\" *: *\".*?\"(\\s|.))))*(\\s)*\\}";
+        String valObj = "\\{(\\s| )*\\}|\\{((((\\s| )*\".*?\" *: *\".*?\",(\\s| )*)+((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)+)(\\s| )*}(\\s| )*|(((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)))*(\\s| )*}(\\s| )*";
         Pattern obj = Pattern.compile(valObj);
         Matcher m = obj.matcher(s);
         return m.matches();
     }
+
+    public static void main(String[] args) throws IOException {
+        JSONFactory f = new JSONFactory() {
+            @Override
+            public JSON object() {
+                return new MyJSON();
+            }
+
+            @Override
+            public JSONParser parser() {
+                return new MyJSONParser();
+            }
+        };
+
+        final JSONParser parser = f.parser();
+        final JSON test = parser.parse("{\"first\":\"sam\", \"last\":\"doe\" } ");
+        final JSON obj = parser.parse("{ \"name\":    {\"first\":   \"sam\", \"last\":\"doe\"}}");
+        final JSON obj2 = parser.parse("{ \"classes\": {\"cs\":\"cs61b\", \"math\":\"none\" }   }");
+
+        final JSON nameObj = obj.getObject("name");
+        final JSON nameObj2 = obj2.getObject("classes");
+
+        Asserts.isNotNull(nameObj);
+        Asserts.isEqual("sam", nameObj.getString("first"));
+        Asserts.isEqual("doe", nameObj.getString("last"));
+        Asserts.isEqual("cs61b", nameObj2.getString("cs"));
+        Asserts.isEqual("none", nameObj2.getString("math"));
+
+    }
+
 
 }
