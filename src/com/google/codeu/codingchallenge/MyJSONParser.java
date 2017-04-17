@@ -14,9 +14,6 @@
 
 package com.google.codeu.codingchallenge;
 
-import jdk.nashorn.internal.runtime.Context;
-import jdk.nashorn.internal.runtime.Source;
-
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,19 +23,20 @@ final class MyJSONParser implements JSONParser {
     @Override
     public JSON parse(String object) throws IOException {
         if (!validObject(object)) {
-            throw new IOException("Invalid JSON-lite object");
+            throw new IOException("Invalid JSON-lite object.");
         }
 
         MyJSON obj = new MyJSON();
 
-        String bothTypes = "( *\".*?\" *):( *\\{\".*?\" *\\}| *\".*?\" *)";
-        Matcher both = Pattern.compile(bothTypes).matcher(object);
-
-        while (both.find()) { //for each key-value match
-            String key = both.group(1);
+        Matcher m = Pattern.compile("(?:\\s)*( *\".*?\" *)(?:\\s)*:(?:\\s)*( *\\{\".*?\" *\\}| *\".*?\" *)(?:\\s)*").matcher(object);
+        while (m.find()) {
+            if (!validKeyValue(m.group())) {
+                throw new IOException("Invalid key-value pair.");
+            }
+            String key = m.group(1);
             key = key.replaceAll("\\s+", " ").trim();
             String noQuotes = key.substring(1, key.length() - 1).trim();
-            String value = both.group(2).trim();
+            String value = m.group(2).trim();
             if (validString(value)) {
                 obj.setString(noQuotes, value.substring(1, value.length() - 1));
             } else {
@@ -50,9 +48,11 @@ final class MyJSONParser implements JSONParser {
     }
 
     private boolean validString(String str) {
-        String jsonRegex = "\".*\"";
-        String test = "\"(((\"|\\t|\\n)*[a-z\\s]*)*|([a-z\\s]*(\"|\\t|\\n)*)*)*\"";
-        Pattern pat = Pattern.compile("[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*");
+        String prev = "[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*";
+        String test = "[\\s]*((?<!\\\\)\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*";
+        String test2 = "( )*\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*[\"\\s]*\"";
+        String idk = "[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*";
+        Pattern pat = Pattern.compile(test2);
         Matcher matcher = pat.matcher(str);
         return matcher.matches();
     }
@@ -66,45 +66,17 @@ final class MyJSONParser implements JSONParser {
         String valObj = "\\{(\\s|\\n)*}|\\{((((\\s|.)*\".*?\" *: *\".*?\",(\\s)*)+((\\s|.)*\".*?\" *: *\".*?\"(\\s)*)+)\\}|(((\\s|.)*\".*?\" *: *\".*?\"(\\s|.))))*(\\s)*\\}";
         Pattern obj = Pattern.compile(valObj);
         Matcher m = obj.matcher(s);
-        if (!m.matches()) {
-            return false;
-        }
-//        } else {
-//            //Check if the key-value pairs are valid
-//            String pair = "( *\".*?\" *: *\".*?\" *)";
-//            Pattern objRegex = Pattern.compile(pair);
-//            Matcher matcher = objRegex.matcher(s);
-//            while (matcher.find()) {
-//                if (!validKeyValue(matcher.group(1)))
-//                    return false;
-//            }
-//            return true;
-//        }
-        return true;
+        return m.matches();
     }
 
-    public static void main(String[] args) throws IOException {
-        JSONFactory f = new JSONFactory() {
-            @Override
-            public JSON object() {
-                return new MyJSON();
-            }
-
-            @Override
-            public JSONParser parser() {
-                return new MyJSONParser();
-            }
-        };
-
-        final JSONParser parser = f.parser();
-        final JSON obj = parser.parse("{ \"name\":{\"first\":\"sam\", \"last\":\"doe\" } }");
-
-        final JSON nameObj = obj.getObject("name");
-
-        Asserts.isNotNull(nameObj);
-        Asserts.isEqual("sam", nameObj.getString("first"));
-        Asserts.isEqual("doe", nameObj.getString("last"));
+    public static void main(String[] args) {
+        MyJSONParser j = new MyJSONParser();
+        String one = "abc";
+        String two = "";
+        String three =  "\"a\tb\n\bc\"";
+        String four = "\\g";
+        System.out.print(j.validString(one));
+        System.out.print(j.validString(two));
+        System.out.print(j.validString(three));
     }
-
-
 }

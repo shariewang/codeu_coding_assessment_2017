@@ -46,8 +46,10 @@ final class TestMain {
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
         final JSON obj = parser.parse("{ \"name\":\"sam doe\" }");
+        final JSON obj2 = parser.parse("{\"first\" : \"sam\", \"home\": \"berkeley\" }");
 
         Asserts.isEqual("sam doe", obj.getString("name"));
+        Asserts.isEqual("berkeley", obj2.getString("home"));
      }
     });
 
