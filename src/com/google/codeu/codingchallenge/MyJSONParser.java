@@ -31,67 +31,43 @@ final class MyJSONParser implements JSONParser {
         String bothTypes = "( *\".*?\" *):( *\\{\".*?\" *\\}| *\".*?\" *)";
         Matcher both = Pattern.compile(bothTypes).matcher(object);
 
-        while (both.find()) { //for each key-value match
+        while (both.find()) {
+            if (!validKeyValue(both.group())) {
+                throw new IOException("Invalid key-value pair");
+            }
             String key = both.group(1);
             key = key.replaceAll("\\s+", " ").trim();
-            String noQuotes = key.substring(1, key.length() - 1).trim();
+            key = key.substring(1, key.length() - 1).trim();
             String value = both.group(2).trim();
             if (validString(value)) {
-                obj.setString(noQuotes, value.substring(1, value.length() - 1));
+                obj.setString(key, value.substring(1, value.length() - 1));
             } else {
                 value = value.replace("\\s+", " ").trim();
-                obj.setObject(noQuotes, parse(value));
+                obj.setObject(key, parse(value));
             }
         }
         return obj;
     }
 
     private boolean validString(String str) {
-        Pattern pat = Pattern.compile("[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*");
+        Pattern pat = Pattern.compile("(\\s| )*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")(\\s| )*");
         Matcher matcher = pat.matcher(str);
         return matcher.matches();
     }
 
     private boolean validKeyValue(String str) {
         String[] keyValue = str.split(":",2);
+        System.out.println(validString(keyValue[0]));
+        System.out.println(validString(keyValue[1]));
+        System.out.println(validObject(keyValue[0]));
         return validString(keyValue[0]) && (validString(keyValue[1]) || validObject(keyValue[1]));
     }
 
     private boolean validObject(String s) {
         String valObj = "\\{(\\s| )*\\}|\\{((((\\s| )*\".*?\" *: *\".*?\",(\\s| )*)+((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)+)(\\s| )*}(\\s| )*|(((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)))*(\\s| )*}(\\s| )*";
+        String prev ="\\{((\".*\":\".*\",(\\s| )*)+(\".*\":\".*\"(\\s| )*))|(\".*\":\".*\"(\\s| )*)}";
         Pattern obj = Pattern.compile(valObj);
         Matcher m = obj.matcher(s);
         return m.matches();
     }
-
-    public static void main(String[] args) throws IOException {
-        JSONFactory f = new JSONFactory() {
-            @Override
-            public JSON object() {
-                return new MyJSON();
-            }
-
-            @Override
-            public JSONParser parser() {
-                return new MyJSONParser();
-            }
-        };
-
-        final JSONParser parser = f.parser();
-        final JSON test = parser.parse("{\"first\":\"sam\", \"last\":\"doe\" } ");
-        final JSON obj = parser.parse("{ \"name\":    {\"first\":   \"sam\", \"last\":\"doe\"}}");
-        final JSON obj2 = parser.parse("{ \"classes\": {\"cs\":\"cs61b\", \"math\":\"none\" }   }");
-
-        final JSON nameObj = obj.getObject("name");
-        final JSON nameObj2 = obj2.getObject("classes");
-
-        Asserts.isNotNull(nameObj);
-        Asserts.isEqual("sam", nameObj.getString("first"));
-        Asserts.isEqual("doe", nameObj.getString("last"));
-        Asserts.isEqual("cs61b", nameObj2.getString("cs"));
-        Asserts.isEqual("none", nameObj2.getString("math"));
-
-    }
-
-
 }
