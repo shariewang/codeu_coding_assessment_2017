@@ -23,20 +23,19 @@ final class MyJSONParser implements JSONParser {
     @Override
     public JSON parse(String object) throws IOException {
         if (!validObject(object)) {
-            throw new IOException("Invalid JSON-lite object.");
+            throw new IOException("Invalid JSON-lite object");
         }
 
         MyJSON obj = new MyJSON();
 
-        Matcher m = Pattern.compile("(?:\\s)*( *\".*?\" *)(?:\\s)*:(?:\\s)*( *\\{\".*?\" *\\}| *\".*?\" *)(?:\\s)*").matcher(object);
-        while (m.find()) {
-            if (!validKeyValue(m.group())) {
-                throw new IOException("Invalid key-value pair.");
-            }
-            String key = m.group(1);
+        String bothTypes = "( *\".*?\" *):( *\\{\".*?\" *\\}| *\".*?\" *)";
+        Matcher both = Pattern.compile(bothTypes).matcher(object);
+
+        while (both.find()) { //for each key-value match
+            String key = both.group(1);
             key = key.replaceAll("\\s+", " ").trim();
             String noQuotes = key.substring(1, key.length() - 1).trim();
-            String value = m.group(2).trim();
+            String value = both.group(2).trim();
             if (validString(value)) {
                 obj.setString(noQuotes, value.substring(1, value.length() - 1));
             } else {
@@ -48,11 +47,7 @@ final class MyJSONParser implements JSONParser {
     }
 
     private boolean validString(String str) {
-        String prev = "[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*";
-        String test = "[\\s]*((?<!\\\\)\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*";
-        String test2 = "( )*\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*[\"\\s]*\"";
-        String idk = "[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*";
-        Pattern pat = Pattern.compile(test2);
+        Pattern pat = Pattern.compile("[\\s]*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\")[\\s]*");
         Matcher matcher = pat.matcher(str);
         return matcher.matches();
     }
@@ -69,14 +64,4 @@ final class MyJSONParser implements JSONParser {
         return m.matches();
     }
 
-    public static void main(String[] args) {
-        MyJSONParser j = new MyJSONParser();
-        String one = "abc";
-        String two = "";
-        String three =  "\"a\tb\n\bc\"";
-        String four = "\\g";
-        System.out.print(j.validString(one));
-        System.out.print(j.validString(two));
-        System.out.print(j.validString(three));
-    }
 }
