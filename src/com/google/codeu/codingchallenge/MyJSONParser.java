@@ -57,15 +57,11 @@ final class MyJSONParser implements JSONParser {
 
     private boolean validKeyValue(String str) {
         String[] keyValue = str.split(":",2);
-        System.out.println(validString(keyValue[0]));
-        System.out.println(validString(keyValue[1]));
-        System.out.println(validObject(keyValue[0]));
         return validString(keyValue[0]) && (validString(keyValue[1]) || validObject(keyValue[1]));
     }
 
     private boolean validObject(String s) {
         String valObj = "\\{(\\s| )*\\}|\\{((((\\s| )*\".*?\" *: *\".*?\",(\\s| )*)+((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)+)(\\s| )*}(\\s| )*|(((\\s| )*\".*?\" *: *\".*?\"(\\s| )*)))*(\\s| )*}(\\s| )*";
-        String prev ="\\{((\".*\":\".*\",(\\s| )*)+(\".*\":\".*\"(\\s| )*))|(\".*\":\".*\"(\\s| )*)}";
         Pattern obj = Pattern.compile(valObj);
         Matcher m = obj.matcher(s);
         return m.matches();
